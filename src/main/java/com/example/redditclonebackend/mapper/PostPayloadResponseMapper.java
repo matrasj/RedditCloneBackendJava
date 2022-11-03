@@ -45,17 +45,17 @@ public class PostPayloadResponseMapper {
 //                .findFirst()
 //                .orElseGet(() -> null);
 
-        if(authService.isLoggedIn()){
+        if(authService.getCurrentUser() != null){
             User currentUser = authService.getCurrentUser();
             Optional<Vote> byPostAndAuthor = voteRepository.findByPostAndAuthor(post, currentUser);
 
             if (byPostAndAuthor.isPresent()) {
                 switch (byPostAndAuthor.get().getVoteType()) {
                     case VOTE_DOWN -> {
-                        return Integer.valueOf(-1);
+                        return -1;
                     }
                     case VOTE_UP -> {
-                        return Integer.valueOf(1);
+                        return 1;
                     }
                 }
             }

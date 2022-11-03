@@ -13,7 +13,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RestController
 @RequestMapping("/api/v1/social-media-links")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class SocialMediaLinkController {
     private final SocialMediaLinkService socialMediaLinkService;
     @PostMapping

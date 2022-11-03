@@ -1,4 +1,4 @@
-package com.example.redditclonebackend.service.auth;
+package com.example.redditclonebackend.factories;
 
 import com.example.redditclonebackend.entity.ConfirmationToken;
 import org.springframework.stereotype.Service;

@@ -14,9 +14,9 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
-@RequestMapping("/api/v1/sub-reddit")
+@RequestMapping("/api/v1/sub-reddits")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class SubredditController {
     private final SubredditService subredditService;
     @PostMapping

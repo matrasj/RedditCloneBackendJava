@@ -6,8 +6,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static javax.persistence.CascadeType.ALL;
+import static javax.persistence.CascadeType.*;
+import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
@@ -35,6 +37,23 @@ public class User {
     @Column(name = "biography", columnDefinition = "TEXT")
     private String biography;
 
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private Date createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "last_updated")
+    private Date lastUpdated;
+
+    @Column(name = "enabled")
+    private boolean enabled;
+
+    @Column(name = "profile_image_link")
+    private String profileImageLink;
+
+    @OneToMany(mappedBy = "author", cascade = ALL)
+    private List<Subreddit> subreddits = new ArrayList<>();
+
     @OneToMany(mappedBy = "user")
     private List<SocialMediaLink> links = new ArrayList<>();
 
@@ -50,22 +69,28 @@ public class User {
     @OneToMany(mappedBy = "author")
     private Set<Vote> votes = new HashSet<>();
 
-    @CreationTimestamp
-    @Column(name = "created_at")
-    private Date createdAt;
+    @ManyToMany(cascade = {
+            MERGE, PERSIST
+    }, fetch = EAGER)
+    @JoinTable(name = "user_role",
+        joinColumns = {
+            @JoinColumn(name = "user_id", referencedColumnName = "id")
+        },
+        inverseJoinColumns = {
+            @JoinColumn(name = "role_id", referencedColumnName = "id")
+        }
+    )
+    private Set<Role> roles = new HashSet<>();
 
-    @UpdateTimestamp
-    @Column(name = "last_updated")
-    private Date lastUpdated;
+    public Set<Authority> getAuthorities() {
+        return roles
+                .stream()
+                .map(Role::getAuthorities)
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
+    }
 
-    @Column(name = "enabled")
-    private boolean enabled;
 
-    @OneToMany(mappedBy = "author", cascade = ALL)
-    private List<Subreddit> subreddits = new ArrayList<>();
-
-    @Column(name = "profile_image_link")
-    private String profileImageLink;
 
 
 }
