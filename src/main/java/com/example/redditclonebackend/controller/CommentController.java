@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.io.IOException;
 
 import static org.springframework.http.HttpStatus.CREATED;
@@ -30,7 +31,7 @@ public class CommentController {
 
     @PostMapping("/post/id/{postId}")
     public ResponseEntity<String> addComment(@PathVariable Long postId,
-                                          @ModelAttribute CommentPayloadRequest commentPayloadRequest) throws IOException {
+                                          @ModelAttribute @Valid CommentPayloadRequest commentPayloadRequest) throws IOException {
         return ResponseEntity.status(CREATED)
                 .body(commentService.createCommentAndAssignToPost(postId, commentPayloadRequest));
     }

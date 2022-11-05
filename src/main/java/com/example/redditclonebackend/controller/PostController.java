@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.io.IOException;
 
 import static org.springframework.http.HttpStatus.*;
@@ -20,7 +21,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<String> createPost(@ModelAttribute PostPayloadRequest postPayloadRequest,
+    public ResponseEntity<String> createPost(@ModelAttribute @Valid PostPayloadRequest postPayloadRequest,
                                              @RequestParam Long subredditId) throws IOException {
         return ResponseEntity.status(CREATED)
                 .body(postService.createPostAndAssignToSubreddit(postPayloadRequest, subredditId));

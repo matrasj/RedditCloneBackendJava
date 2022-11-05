@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 import static org.springframework.http.HttpStatus.*;
 
 @RestController
@@ -18,7 +20,7 @@ import static org.springframework.http.HttpStatus.*;
 public class AuthController {
     private final AuthService authService;
     @PostMapping("/registration")
-    public ResponseEntity<RegistrationResponse> signUp(@RequestBody RegistrationRequest request) {
+    public ResponseEntity<RegistrationResponse> signUp(@RequestBody @Valid RegistrationRequest request) {
         return ResponseEntity.status(CREATED)
                 .body(authService.registerUser(request));
     }
@@ -30,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
         return ResponseEntity.status(OK)
                 .body(authService.login(loginRequest));
     }
