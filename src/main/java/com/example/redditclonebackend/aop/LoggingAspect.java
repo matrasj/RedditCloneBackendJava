@@ -41,6 +41,6 @@ public class LoggingAspect {
         String methodName = joinPoint.getSignature().getName();
 
         log.info("After calling method: " + methodName);
-        log.info("Result from calling method: " + methodName + " is: " + result.toString());
+        log.info("Result from calling method: " + methodName + " is: " + result);
     }
 }

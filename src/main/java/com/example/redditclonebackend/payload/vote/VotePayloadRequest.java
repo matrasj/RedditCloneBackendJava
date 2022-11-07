@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class VotePayloadRequest {
     private Integer voteValue;
     private Long postId;
+    private String authorUsername;
 }

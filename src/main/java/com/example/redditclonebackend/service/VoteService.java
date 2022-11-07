@@ -12,6 +12,8 @@ import com.example.redditclonebackend.repository.VoteRepository;
 import com.example.redditclonebackend.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,20 +27,23 @@ import static com.example.redditclonebackend.entity.VoteType.VOTE_UP;
 @Slf4j
 public class VoteService {
     private static final String NOT_FOUND_POST_MESSAGE = "Not found post with id %d";
+    private static final String NOT_FOUND_USER_MESSAGE = "Not found user with id %s";
     private final VoteRepository voteRepository;
     private final PostRepository postRepository;
-    private final AuthService authService;
+
     private final UserRepository userRepository;
 
     @Transactional
-    public VotePayloadResponse votePost(VotePayloadRequest votePayloadRequest) {
+    public VotePayloadResponse votePost(@NotNull VotePayloadRequest votePayloadRequest) {
         Post post = postRepository.findById(votePayloadRequest.getPostId())
                 .orElseThrow(() -> new PostNotFoundException(String.format(NOT_FOUND_POST_MESSAGE, votePayloadRequest.getPostId())));
 
-        User user = authService.getCurrentUser();
+        User user = userRepository.findByUsername(votePayloadRequest.getAuthorUsername())
+                .orElseThrow(() -> new UsernameNotFoundException(String.format(NOT_FOUND_USER_MESSAGE, votePayloadRequest.getAuthorUsername())));
 
 
         Optional<Vote> voteByPostAndAuthor = voteRepository.findByPostAndAuthor(post, user);
+        System.out.println(voteByPostAndAuthor);
 
         if (voteByPostAndAuthor.isPresent() && votePayloadRequest.getVoteValue().equals(
                 voteByPostAndAuthor.get().getVoteType().getDirection()
@@ -49,14 +54,23 @@ public class VoteService {
                 post.setVoteCount(post.getVoteCount() - 1);
             }
             log.info("First path");
-            voteRepository.delete(voteByPostAndAuthor.get());
+            System.out.println(voteByPostAndAuthor.get().getId());
+            try {
+                voteRepository.deleteById(voteByPostAndAuthor.get().getId());
+            } catch (NullPointerException nullPointerException) {
+                System.out.println(nullPointerException.getMessage());
+            }
+            System.out.println("AFTER");
+
         }
 
         else if(voteByPostAndAuthor.isPresent() && !votePayloadRequest.getVoteValue().equals(
                 voteByPostAndAuthor.get().getVoteType().getDirection())
         ){
+            log.warn("SECOND PATH");
 
             voteRepository.delete(voteByPostAndAuthor.get());
+            System.out.println(voteRepository.findAll().size());
             Vote vote = Vote.builder()
                     .author(user)
                     .post(post)
@@ -72,18 +86,17 @@ public class VoteService {
         }
 
         else if (voteByPostAndAuthor.isEmpty()) {
+            log.info("THIRD PATH");
             Vote vote = Vote.builder()
                             .author(user).post(post).build();
             giveVote(votePayloadRequest, post, vote, user);
-
-            log.info("Third path");
         }
 
         return new VotePayloadResponse(post.getVoteCount());
     }
 
     private void giveVote(VotePayloadRequest votePayloadRequest, Post post, Vote vote, User user) {
-        log.info("Size before " + voteRepository.findAll().size());
+        System.out.println("HERE");
         if (votePayloadRequest.getVoteValue() > 0) {
             vote.setVoteType(VOTE_UP);
             post.setVoteCount(post.getVoteCount() + 1);
@@ -92,11 +105,12 @@ public class VoteService {
             vote.setVoteType(VOTE_DOWN);
         }
 
+
+
         user.getVotes().add(vote);
         post.getVotes().add(vote);
 
-
         voteRepository.save(vote);
-        log.info("Size after " + voteRepository.findAll().size());
+
     }
 }
